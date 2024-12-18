@@ -57,7 +57,7 @@ export async function getDuomaiTargetUrl (shortUrl, areaCode, proxyInfo) {
       history.push(matchUrl);
       var nextUrl = matchUrl;
       try {
-        var i = 6;
+        var i = 8;
         while (i > 0) {
           var tempUrl = await getNextLocation(nextUrl, proxyAgent);
           if (tempUrl == null || tempUrl.length <= 0) {
@@ -65,11 +65,19 @@ export async function getDuomaiTargetUrl (shortUrl, areaCode, proxyInfo) {
           }
           nextUrl = tempUrl;
           history.push(tempUrl);
+
+          const replaceUrlFromJs = await getReplaceUrl(nextUrl, proxyAgent);
+          if (replaceUrlFromJs != null && replaceUrlFromJs != undefined) {
+            console.log('replaceUrlFromJs:', replaceUrlFromJs)
+            nextUrl = replaceUrlFromJs;
+            history.push(nextUrl);
+          }
           i--;
         }
       } catch (error) {
         console.log('解析url重定向失败', error.error)
       }
+
       return {
         'targetUrl': nextUrl,
         history,
@@ -77,6 +85,7 @@ export async function getDuomaiTargetUrl (shortUrl, areaCode, proxyInfo) {
         location
       }
     }
+
     console.log('没有找到解析失败');
   } catch (error) {
     console.error(error);
@@ -89,15 +98,23 @@ export async function getBonusArriveRedirectUrl (shortUrl, areaCode, proxyInfo) 
   let proxyAgent = getProxyAgentByAreaCode(areaCode, proxyInfo);
   let { proxyIp, location } = await getAgentPublicIp(proxyAgent);
   try {
-    var i = 6;
+    var i = 8;
     var nextUrl = shortUrl;
     while (i > 0) {
       var tempUrl = await getNextLocation(nextUrl, proxyAgent);
       if (tempUrl == null || tempUrl.length <= 0) {
         break;
       }
+      console.log('重定向：', i, tempUrl);
       nextUrl = tempUrl;
       history.push(tempUrl);
+
+      // 检查 js replace
+      const replaceUrlFromJs = await getReplaceUrl(nextUrl, proxyAgent);
+      if (replaceUrlFromJs != null && replaceUrlFromJs != undefined) {
+        nextUrl = replaceUrlFromJs;
+        history.push(nextUrl);
+      }
       i--;
     }
     if (nextUrl != shortUrl) {
@@ -139,4 +156,49 @@ async function getNextLocation (url, proxyAgent) {
   }
   // 没找到302
   return nextUrl;
+}
+
+
+export async function getReplaceUrl (url, proxyAgent) {
+  const response = await axios.get(url, { 'httpAgent': proxyAgent });
+  // 使用cheerio来解析HTML
+  const $ = cheerio.load(response.data);
+
+  // 使用Promise.all来处理所有的script标签
+  const promises = $('script').map((_, script) => {
+    // 获取script标签的内容
+    const scriptContent = $(script).html();
+
+    // 使用正则表达式匹配window.location.replace中的URL
+    const regex = /window\.location\.replace\('([^']+)'\)/;
+    const match = scriptContent.match(regex);
+
+    // 如果找到匹配的URL，返回匹配结果
+    if (match) {
+      console.log('replace model 2 hit.', match[1]);
+      return match[1];
+    } else {
+      const scriptContent = $('script').text();
+      const regex = /var u=(['"](.+?)['"])/;
+      const match = scriptContent.match(regex);
+      if (match) {
+        console.log('replace model 1 hit.', match[2]);
+        return match[2];
+      }
+    }
+    return null;
+  }).get(); // 将map转换为实际的数组
+
+  // 等待所有promises解决
+  const results = await Promise.all(promises);
+
+  // 找到第一个非null的结果
+  const redirectUrl = results.find(result => result !== null);
+
+  if (redirectUrl) {
+    console.log('Replace URL:', redirectUrl);
+    return redirectUrl;
+  }
+
+  return null;
 }
