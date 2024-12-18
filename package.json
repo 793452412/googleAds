@@ -1,0 +1,22 @@
+{
+  "name": "bonus-ad",
+  "version": "1.0.0",
+  "description": "bonus-ad",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ad"
+  ],
+  "author": "hicooper",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "express": "^4.21.2",
+    "express-status-monitor": "^1.3.4",
+    "https-proxy-agent": "^7.0.6",
+    "node-fetch": "^3.3.2"
+  },
+  "type": "module"
+}
