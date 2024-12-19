@@ -43,54 +43,53 @@ export async function getDuomaiTargetUrl (shortUrl, areaCode, proxyInfo) {
   var history = [shortUrl];
   let proxyAgent = getProxyAgentByAreaCode(areaCode, proxyInfo);
   let { proxyIp, location } = await getAgentPublicIp(proxyAgent);
-  try {
-    const response = await axios.get(shortUrl, { 'httpAgent': proxyAgent });
-    // 使用cheerio来解析HTML
-    const $ = cheerio.load(response.data);
-    const scriptContent = $('script').text();
-    const regex = /var u=(['"](.+?)['"])/;
-    const match = scriptContent.match(regex);
+  const response = await axios.get(shortUrl, { 'httpAgent': proxyAgent });
+  // 使用cheerio来解析HTML
+  const $ = cheerio.load(response.data);
+  const scriptContent = $('script').text();
+  const regex = /var u=(['"](.+?)['"])/;
+  const match = scriptContent.match(regex);
 
-    if (match) {
-      console.log('提取的u变量值为：', match[2]);
-      const matchUrl = match[2] + parsedUrl?.hash
-      history.push(matchUrl);
-      var nextUrl = matchUrl;
-      try {
-        var i = 8;
-        while (i > 0) {
-          var tempUrl = await getNextLocation(nextUrl, proxyAgent);
-          if (tempUrl == null || tempUrl.length <= 0) {
-            break;
-          }
-          nextUrl = tempUrl;
-          history.push(tempUrl);
-
-          const replaceUrlFromJs = await getReplaceUrl(nextUrl, proxyAgent);
-          if (replaceUrlFromJs != null && replaceUrlFromJs != undefined) {
-            console.log('replaceUrlFromJs:', replaceUrlFromJs)
-            nextUrl = replaceUrlFromJs;
-            history.push(nextUrl);
-          }
-          i--;
+  if (match) {
+    console.log('提取的u变量值为：', match[2]);
+    const matchUrl = match[2] + parsedUrl?.hash
+    history.push(matchUrl);
+    var nextUrl = matchUrl;
+    try {
+      for (let i = 0; i < 8; i++) {
+        var tempUrl = '';
+        try {
+          tempUrl = await getNextLocation(nextUrl, proxyAgent);
+        } catch (error) {
+          // 异常中断
+          break;
         }
-      } catch (error) {
-        console.log('解析url重定向失败', error.error)
-      }
+        // 找不到下一个重定向头部地址，终端
+        if (tempUrl == null || tempUrl.length <= 0) {
+          break;
+        }
+        console.log('重定向：', i, tempUrl);
+        nextUrl = tempUrl;
+        history.push(tempUrl);
 
-      return {
-        'targetUrl': nextUrl,
-        history,
-        proxyIp,
-        location
+        // 检查 js replace
+        const replaceUrlFromJs = await getReplaceUrl(nextUrl, proxyAgent);
+        if (replaceUrlFromJs != null && replaceUrlFromJs != undefined) {
+          nextUrl = replaceUrlFromJs;
+          history.push(nextUrl);
+        }
       }
+    } catch (error) {
+      console.log('解析url重定向失败')
     }
 
-    console.log('没有找到解析失败');
-  } catch (error) {
-    console.error(error);
+    return {
+      'targetUrl': nextUrl,
+      history,
+      proxyIp,
+      location
+    }
   }
-  return {}
 }
 
 export async function getBonusArriveRedirectUrl (shortUrl, areaCode, proxyInfo) {
@@ -98,10 +97,16 @@ export async function getBonusArriveRedirectUrl (shortUrl, areaCode, proxyInfo) 
   let proxyAgent = getProxyAgentByAreaCode(areaCode, proxyInfo);
   let { proxyIp, location } = await getAgentPublicIp(proxyAgent);
   try {
-    var i = 8;
     var nextUrl = shortUrl;
-    while (i > 0) {
-      var tempUrl = await getNextLocation(nextUrl, proxyAgent);
+    for (let i = 0; i < 8; i++) {
+      var tempUrl = '';
+      try {
+        tempUrl = await getNextLocation(nextUrl, proxyAgent);
+      } catch (error) {
+        // 异常中断
+        break;
+      }
+      // 找不到下一个重定向头部地址，终端
       if (tempUrl == null || tempUrl.length <= 0) {
         break;
       }
@@ -110,13 +115,18 @@ export async function getBonusArriveRedirectUrl (shortUrl, areaCode, proxyInfo) 
       history.push(tempUrl);
 
       // 检查 js replace
-      const replaceUrlFromJs = await getReplaceUrl(nextUrl, proxyAgent);
-      if (replaceUrlFromJs != null && replaceUrlFromJs != undefined) {
-        nextUrl = replaceUrlFromJs;
-        history.push(nextUrl);
+      try {
+        const replaceUrlFromJs = await getReplaceUrl(nextUrl, proxyAgent);
+        if (replaceUrlFromJs != null && replaceUrlFromJs != undefined) {
+          nextUrl = replaceUrlFromJs;
+          history.push(nextUrl);
+        }
+      } catch (error) {
+        console.log('find js redirects exception')
+        break;
       }
-      i--;
     }
+
     if (nextUrl != shortUrl) {
       return {
         'targetUrl': nextUrl,
@@ -125,7 +135,7 @@ export async function getBonusArriveRedirectUrl (shortUrl, areaCode, proxyInfo) 
         location
       };
     }
-    console.log('fail parse url.' + shortUrl)
+    console.log('fail parse url:' + shortUrl)
     return {
       "targetUrl": '',
       history,
@@ -158,6 +168,7 @@ async function getNextLocation (url, proxyAgent) {
   return nextUrl;
 }
 
+const list_regex = [/window\.location\.replace\('([^']+)'\)/, /var u=['"](.+?)['"]/];
 
 export async function getReplaceUrl (url, proxyAgent) {
   const response = await axios.get(url, { 'httpAgent': proxyAgent });
@@ -168,35 +179,26 @@ export async function getReplaceUrl (url, proxyAgent) {
   const promises = $('script').map((_, script) => {
     // 获取script标签的内容
     const scriptContent = $(script).html();
-
-    // 使用正则表达式匹配window.location.replace中的URL
-    const regex = /window\.location\.replace\('([^']+)'\)/;
-    const match = scriptContent.match(regex);
-
-    // 如果找到匹配的URL，返回匹配结果
-    if (match) {
-      console.log('replace model 2 hit.', match[1]);
-      return match[1];
-    } else {
-      const scriptContent = $('script').text();
-      const regex = /var u=(['"](.+?)['"])/;
+    console.log('scriptContent1:', scriptContent)
+    let match_url = '';
+    list_regex.forEach(regex => {
       const match = scriptContent.match(regex);
       if (match) {
-        console.log('replace model 1 hit.', match[2]);
-        return match[2];
+        match_url = match[1];
+        console.log('replace model 2 hit.', regex, match_url);
+        return;
       }
-    }
-    return null;
+    })
+    return match_url;
   }).get(); // 将map转换为实际的数组
 
   // 等待所有promises解决
   const results = await Promise.all(promises);
 
   // 找到第一个非null的结果
-  const redirectUrl = results.find(result => result !== null);
+  const redirectUrl = results.find(result => result.length > 0);
 
   if (redirectUrl) {
-    console.log('Replace URL:', redirectUrl);
     return redirectUrl;
   }
 
