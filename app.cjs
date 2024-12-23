@@ -24,7 +24,7 @@ app.post('/api/getTargetUrl', async (req, res) => {
   try {
     // 解析URL
     const parsedUrl = new URL(url);
-    if (parsedUrl.hostname == 'c.duomai.com' || parsedUrl.hostname == 'click.quk.com') {
+    if (parsedUrl.hostname == 'c.duomai.com' || parsedUrl.hostname === 'click.quk.com') {
       let { targetUrl, history, proxyIp, location } = await getDuomaiTargetUrl(url, areaCode, proxyInfo);
       let result = buildResult(url, targetUrl, history, proxyIp, location, areaCode);
       res.json(result);
