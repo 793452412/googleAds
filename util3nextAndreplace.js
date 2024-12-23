@@ -3,22 +3,9 @@ import axios from 'axios'
 import * as cheerio from 'cheerio';
 import { URL } from 'url';
 
-// function getProxyAgentByAreaCode (areaCode, proxyInfo) {
-//   if (proxyInfo != null) {
-//     const { username, passward, host, port } = proxyInfo;
-//     if (areaCode == undefined || areaCode.length == 0) {
-//       return new HttpsProxyAgent(`http://${username}:${passward}@${host}:${port}`);
-//     }
-//     return new HttpsProxyAgent(`http://${username}:${passward}_` + areaCode + `@${host}:${port}`);
-//   }
-//   if (areaCode == undefined || areaCode.length == 0) {
-//     return new HttpsProxyAgent('http://uPc6yO0KYBKFK7Ba:K2EMHhDpaaFVryse@geo.iproyal.com:12321');
-//   }
-//   return new HttpsProxyAgent('http://uPc6yO0KYBKFK7Ba:K2EMHhDpaaFVryse_' + areaCode + '@geo.iproyal.com:12321');
-// }
 
 
-function getProxyAgentByAreaCode(areaCode, proxyInfo) {
+export function getProxyAgentByAreaCode(areaCode, proxyInfo) {
   const defaultProxy = {
     username: 'uPc6yO0KYBKFK7Ba',
     password: 'K2EMHhDpaaFVryse',
@@ -50,20 +37,6 @@ async function getAgentPublicIp (agent) {
     console.log('解析代理ip失败 ：' +　error)
   }
   return { proxyIp, location };
-}
-export async function  checkUrlIsJsRedirect(responseData){
-  try {
-    const $ = cheerio.load(response.data);
-    const scriptContent = $('script').text();
-    console.log('checkUrlIsJsRedirect　scriptContent  :' +scriptContent);
-    const regex = /var\s+u\s*=\s*(['"])(https?.+?)\1/;
-    const match = scriptContent.match(regex);
-    console.log('checkUrlIsJsRedirect  :' +match);
-    return match;
-  }catch(error){
-    console.log("checkUrlIsJsRedirect : "+checkUrlIsJsRedirect)
-  }
-
 }
 
 
@@ -131,37 +104,47 @@ export async function   getDuomaiTargetUrl (shortUrl, areaCode, proxyInfo) {
 
 
 export async function getBonusArriveRedirectUrl (shortUrl, areaCode, proxyInfo) {
+  // 解析URL
+  const parsedUrl = new URL(shortUrl);
+  if (parsedUrl.hostname == 'c.duomai.com' || parsedUrl.hostname == 'click.quk.com') {
+    return await getDuomaiTargetUrl(shortUrl, areaCode, proxyInfo);
+  }
+
   var history = [shortUrl];
   let proxyAgent = getProxyAgentByAreaCode(areaCode, proxyInfo);
   let { proxyIp, location } = await getAgentPublicIp(proxyAgent);
   try {
     var nextUrl = shortUrl;
+    var lastParseUrl = '';
     for (let i = 0; i < 8; i++) {
+      if (nextUrl == lastParseUrl) {
+        break;
+      }
       var tempUrl = '';
       try {
         tempUrl = await getNextLocation(nextUrl, proxyAgent);
+        lastParseUrl = nextUrl;
       } catch (error) {
-        // 异常中断
-        break;
+        console.log('find 3xx redirects exception')
       }
       // 找不到下一个重定向头部地址，终端
-      if (tempUrl == null || tempUrl.length <= 0) {
-        break;
+      if (tempUrl != null && tempUrl.length > 0) {
+        console.log('重定向：', i, tempUrl);
+        nextUrl = tempUrl;
+        history.push(tempUrl);
       }
-      console.log('重定向：', i, tempUrl);
-      nextUrl = tempUrl;
-      history.push(tempUrl);
 
       // 检查 js replace
       try {
         const replaceUrlFromJs = await getReplaceUrl(nextUrl, proxyAgent);
         if (replaceUrlFromJs != null && replaceUrlFromJs != undefined) {
+          lastParseUrl = nextUrl;
           nextUrl = replaceUrlFromJs;
           history.push(nextUrl);
         }
       } catch (error) {
         console.log('find js redirects exception')
-        break;
+        // break;
       }
     }
 
@@ -217,27 +200,28 @@ async function getNextLocation (url, proxyAgent) {
 const list_regex = [/window\.location\.replace\('([^']+)'\)/,
   /var\s+u\s*=\s*(['"])(https?.+?)\1/,
   /location\.replace\('([^']+)'\)/,
-  /var\s+u\s*=\s*['"]([^'"]+)['"]/];
+  /var\s+u\s*=\s*['"]([^'"]+)['"]/,
+  /var link = "(.*?)";/];
 export async function getReplaceUrl (url, proxyAgent) {
-  const response = await axios.get(url, { 'httpAgent': proxyAgent });
+  const response = await axios.get(url, { 'httpAgent': proxyAgent, timeout: 5000 });
   // 使用cheerio来解析HTML
   const $ = cheerio.load(response.data);
-
+  const parsedUrl = new URL(url);
   // 使用Promise.all来处理所有的script标签
   const promises = $('script').map((_, script) => {
     // 获取script标签的内容
     const scriptContent = $(script).html();
+    console.log('scriptContent:', scriptContent)
     let match_url = '';
-    list_regex.forEach(regex => {
+    list_regex.forEach((regex, index) => {
       const match = scriptContent.match(regex);
-      // console.log('getReplaceUrl match : '+match);
       if (match) {
         match_url = match[1];
-        console.log('replace model 2 hit.', regex, match_url);
+        console.log(`正则匹配: ${regex}, 提取: ${match_url}`);
         return;
       }
     })
-    return match_url;
+    return match_url + parsedUrl?.hash;
   }).get(); // 将map转换为实际的数组
 
   // 等待所有promises解决
@@ -252,24 +236,3 @@ export async function getReplaceUrl (url, proxyAgent) {
 
   return null;
 }
-// export async function getReplaceUrl(url, proxyAgent) {
-//   const response = await axios.get(url, { 'httpAgent': proxyAgent });
-//   // 使用cheerio来解析HTML
-//   const $ = cheerio.load(response.data);
-//
-//     // 获取script标签的内容
-//   const scriptContent = $(script).text();
-//   console.log('getReplaceUrl , scriptContent:', scriptContent);
-//   const regex = /var\s+u\s*=\s*(['"])(https?.+?)\1/ | /location\.replace\('([^']+)'\)/;
-//   const match = scriptContent.match(regex);
-//   console.log('getDuomaiTargetUrl match :' +match);
-//   return match[2];
-//
-//
-//
-//   if (redirectUrl) {
-//     return redirectUrl;
-//   }
-//
-//   return null;  // 如果没有找到有效的URL，返回null
-// }
