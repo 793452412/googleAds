@@ -49,12 +49,14 @@ export async function   getDuomaiTargetUrl (shortUrl, proxyInfo) {
   // 解析URLhttps://app.partnermatic.com/track/b7f6y1oJTi8biVngnexde8_arqC2wSYJx3zmZ_b38_aUKool_bsD8ONK3ZSJ5LoswUp5bmNBQgkvgHu3?url=https%3A%2F%2Fwearnumi.com&uid=1221
 
   console.log('run DuomaiTargetUrl =================================================================================');
+  console.log('所需解析的短链是 ：  ======================' +shortUrl);
 
   const parsedUrl = new URL(shortUrl);
   var history = [shortUrl];
 
   let proxyAgent = getProxyAgentByAreaCode( proxyInfo);  //获取代理商转发地址
   let { proxyIp, location } = await getAgentPublicIp(proxyAgent);   // 获取代理地址相关信息 IP  所属地区
+  console.log("获取代理地址成功");
   const response = await axios.get(shortUrl, { 'httpAgent': proxyAgent });
   // 使用cheerio来解析HTML
   const $ = cheerio.load(response.data);

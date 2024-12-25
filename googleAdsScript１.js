@@ -1,14 +1,13 @@
-//服务器解长链版本
-
 var failCount = 0;  // 记录连续失败次数
 
-function getUrlFromApi(url, proxyInfo) {
+function getUrlFromApi(url, proxyInfo,funType) {
   var apiUrl = "http://198.11.177.211:3000/api/getTargetUrl"; // API接口地址
 
   // 构造请求体
   var payload = {
     "url": url,
-    "proxyInfo": proxyInfo
+    "proxyInfo": proxyInfo,
+    "funType":funType
   };
 
   // 配置请求头和请求体
@@ -25,10 +24,15 @@ function getUrlFromApi(url, proxyInfo) {
     var responseJson = JSON.parse(response.getContentText());
 
     // 获取接口返回的 URL 和 history 列表
-    var targetUrl = responseJson.targetUrl; // 假设接口返回的 JSON 中有 targetUrl 字段
-    var history = responseJson.history; // 假设接口返回的 JSON 中有 history 字段，包含一个 URL 列表
+    if (responseJson.status !== 'success') {
+      Logger.log('API response error: ' + responseJson.message);
+      return null; // 如果接口返回失败状态，直接返回 null
+    }
 
-    return { targetUrl: targetUrl, history: history };
+    var targetUrl = responseJson.data.targetUrl; // 获取 targetUrl 字段
+    var history = responseJson.data.history; // 获取 history 列表
+    var url = responseJson.data.url; // 获取原始 URL
+    return { targetUrl: targetUrl, history: history, url: url };
   } catch (e) {
     Logger.log('Error fetching URL from API: ' + e.toString());
     return null;
@@ -39,44 +43,45 @@ function main() {
   // 配置您的代理信息
   var proxyInfo = {
     "username": "uPc6yO0KYBKFK7Ba",
-    "passward": "K2EMHhDpaaFVryse_country-us",
+    "password": "K2EMHhDpaaFVryse_country-us",
     "host": "geo.iproyal.com",
     "port": "12321"
   };
+  var funType = "fun1";
+  // 配置您的 URL，可以通过 history 列表选择或使用 url 或 targetUrl 字段
+  var defaultUrl = "https://www.bonusarrive.com/link?ad=138681&c=1346&f=0"; // 默认URL
+  var useHistory = false;  // 设置为 true 使用 history 列表，false 使用 targetUrl 或 url
 
-  // 配置您的 URL，可以通过 history 列表选择或使用 tagurl 字段
-  var tagurl = "https://www.bonusarrive.com/link?ad=56584&c=1174&f=0"; // 默认URL
-
-  // 设置常量，决定是否使用 history 中的 URL 或 tagurl
-  var useHistory = true;  // 设置为 true 使用 history 列表，false 使用 tagurl
+  // 设置要使用的 history 索引（如果 useHistory 为 true）
+  var historyIndex = 0;  // 默认使用 history 列表中的第一个 URL
 
   // 循环执行，每分钟一次，最多连续失败 3 次
   while (true) {
     Logger.log("Script execution started at: " + new Date());
 
     // 从接口获取目标 URL 和 history 列表
-    var apiResponse = getUrlFromApi(tagurl, proxyInfo);
+    var apiResponse = getUrlFromApi(defaultUrl, proxyInfo,funType);
 
     if (apiResponse) {
-      var targetUrl = apiResponse.targetUrl;  // 获取目标 URL
-      var history = apiResponse.history;  // 获取历史 URL 列表
+      var targetUrl = apiResponse.targetUrl;  // 获取 targetUrl
+      var history = apiResponse.history;  // 获取 history 列表
+      var url = apiResponse.url;  // 获取原始 URL
 
-      // 根据 useHistory 常量选择URL
+      // 根据 useHistory 常量选择 URL
       var selectedUrl;
       if (useHistory && history && history.length > 0) {
-        var selectedHistoryIndex = 0;  // 选择 history 中的第一个 URL，可以修改这个索引
-        selectedUrl = history[selectedHistoryIndex];
+        selectedUrl = history[historyIndex];  // 使用 history 列表中的 URL
       } else {
-        selectedUrl = targetUrl || tagurl;
+        selectedUrl = targetUrl || url || defaultUrl;  // 使用 targetUrl 或 url，若无则使用默认 URL
       }
 
       Logger.log("Selected URL for processing: " + selectedUrl);
 
       // 获取广告系列
-      const campaignName = "FL Xiaomi ES";  // 广告系列名称
+      const campaignName = "FL LSKD";  // 广告系列名称
       const campaignIterator = AdsApp.campaigns()
-        .withCondition(`campaign.name = "${campaignName}"`)
-        .get();
+          .withCondition(`campaign.name = "${campaignName}"`)
+          .get();
 
       if (campaignIterator.hasNext()) {
         const campaign = campaignIterator.next();
@@ -118,6 +123,7 @@ function main() {
 
     // 每次循环后等待 1 分钟
     Logger.log("Sleeping for 1 minute before next update...");
-    Utilities.sleep(60 * 1000); // 60秒 = 1分钟
+    //Utilities.sleep(60 * 1000); // 60秒 = 1分钟
+    break;
   }
 }

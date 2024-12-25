@@ -22,7 +22,6 @@ app.post('/api/getTargetUrl', async (req, res) => {
   // 从请求体中获取url和cityCode参数
   const { url, areaCode, proxyInfo ,funType} = req.body;
   try {
-
     const { targetUrl, history, proxyIp, location } = await getBonusArriveRedirectUrl(url, proxyInfo,funType);
     const result = buildResult(url, targetUrl, history, proxyIp, location, areaCode);
     res.json(result);
