@@ -7,14 +7,14 @@ import { URL } from 'url';
 
 export function getProxyAgentByAreaCode( proxyInfo) {
   const defaultProxy = {
-    // username: '176210116482s_area-US',
-    // password: 'chuyi1122',
-    // host: 'proxy.smartproxycn.com',
-    // port: '1000',
-    username: 'uPc6yO0KYBKFK7Ba',
-    password: 'K2EMHhDpaaFVryse_country-us',
-    host: 'geo.iproyal.com',
-    port: '12321'
+    username: '176210116482s_area-US',
+    password: 'chuyi1122',
+    host: 'proxy.smartproxycn.com',
+    port: '1000',
+    // username: 'uPc6yO0KYBKFK7Ba',
+    // password: 'K2EMHhDpaaFVryse_country-us',
+    // host: 'geo.iproyal.com',
+    // port: '12321'
   };
 
   const selectedProxy = proxyInfo || defaultProxy;
@@ -47,6 +47,9 @@ async function getAgentPublicIp (agent) {
 
 export async function   getDuomaiTargetUrl (shortUrl, proxyInfo) {
   // 解析URLhttps://app.partnermatic.com/track/b7f6y1oJTi8biVngnexde8_arqC2wSYJx3zmZ_b38_aUKool_bsD8ONK3ZSJ5LoswUp5bmNBQgkvgHu3?url=https%3A%2F%2Fwearnumi.com&uid=1221
+
+  console.log('run DuomaiTargetUrl =================================================================================');
+
   const parsedUrl = new URL(shortUrl);
   var history = [shortUrl];
 

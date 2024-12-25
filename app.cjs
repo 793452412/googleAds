@@ -21,16 +21,8 @@ app.get('/api/data', (req, res) => {
 app.post('/api/getTargetUrl', async (req, res) => {
   // 从请求体中获取url和cityCode参数
   const { url, areaCode, proxyInfo ,funType} = req.body;
-  if (funType ==undefined || funType == null|| funType != 'fun1') {
-    console.error(error);
-    res.status(403).json({
-      status: 'error',
-      message: '未输入正确操作指令',
-      error: error.message
-    });
-  }
-
   try {
+
     const { targetUrl, history, proxyIp, location } = await getBonusArriveRedirectUrl(url, proxyInfo,funType);
     const result = buildResult(url, targetUrl, history, proxyIp, location, areaCode);
     res.json(result);
