@@ -5,25 +5,30 @@ import { URL } from 'url';
 
 
 
-export function getProxyAgentByAreaCode(areaCode, proxyInfo) {
+export function getProxyAgentByAreaCode( proxyInfo) {
   const defaultProxy = {
+    // username: '176210116482s_area-US',
+    // password: 'chuyi1122',
+    // host: 'proxy.smartproxycn.com',
+    // port: '1000',
     username: 'uPc6yO0KYBKFK7Ba',
-    password: 'K2EMHhDpaaFVryse',
+    password: 'K2EMHhDpaaFVryse_country-us',
     host: 'geo.iproyal.com',
     port: '12321'
   };
+
   const selectedProxy = proxyInfo || defaultProxy;
   const { username, password, host, port } = selectedProxy;
-  const areaSuffix = (areaCode && areaCode.length > 0) ? `_${areaCode}` : '';
+  console.log(`当前IP ：http://${username}:${password}@${host}:${port}`)
 
-  return new HttpsProxyAgent(`http://${username}:${password}${areaSuffix}@${host}:${port}`);
+  return new HttpsProxyAgent(`http://${username}:${password}@${host}:${port}`);
 }
 
 async function getAgentPublicIp (agent) {
   let proxyIp = '';
   let location = '';
   try {
-    const response = await axios.get('https://httpbin.org/ip', { 'httpsAgent': agent, timeout: 1000 });
+    const response = await axios.get('https://httpbin.org/ip', { 'httpsAgent': agent });
     console.log(response?.data);
     proxyIp = response?.data?.origin;
     if (proxyIp != undefined) {
@@ -40,12 +45,12 @@ async function getAgentPublicIp (agent) {
 }
 
 
-export async function   getDuomaiTargetUrl (shortUrl, areaCode, proxyInfo) {
+export async function   getDuomaiTargetUrl (shortUrl, proxyInfo) {
   // 解析URLhttps://app.partnermatic.com/track/b7f6y1oJTi8biVngnexde8_arqC2wSYJx3zmZ_b38_aUKool_bsD8ONK3ZSJ5LoswUp5bmNBQgkvgHu3?url=https%3A%2F%2Fwearnumi.com&uid=1221
   const parsedUrl = new URL(shortUrl);
   var history = [shortUrl];
 
-  let proxyAgent = getProxyAgentByAreaCode(areaCode, proxyInfo);  //获取代理商转发地址
+  let proxyAgent = getProxyAgentByAreaCode( proxyInfo);  //获取代理商转发地址
   let { proxyIp, location } = await getAgentPublicIp(proxyAgent);   // 获取代理地址相关信息 IP  所属地区
   const response = await axios.get(shortUrl, { 'httpAgent': proxyAgent });
   // 使用cheerio来解析HTML
@@ -103,15 +108,20 @@ export async function   getDuomaiTargetUrl (shortUrl, areaCode, proxyInfo) {
 }
 
 
-export async function getBonusArriveRedirectUrl (shortUrl, areaCode, proxyInfo) {
+export async function getBonusArriveRedirectUrl (shortUrl, proxyInfo,funType) {
   // 解析URL
   const parsedUrl = new URL(shortUrl);
-  if (parsedUrl.hostname == 'c.duomai.com' || parsedUrl.hostname == 'click.quk.com') {
-    return await getDuomaiTargetUrl(shortUrl, areaCode, proxyInfo);
+  // if (parsedUrl.hostname == 'c.duomai.com' || parsedUrl.hostname == 'click.quk.com') {
+  //   return await getDuomaiTargetUrl(shortUrl,  proxyInfo);
+  // }
+
+  if (funType =='fun1'){
+      return await getDuomaiTargetUrl(shortUrl,  proxyInfo);
+
   }
 
   var history = [shortUrl];
-  let proxyAgent = getProxyAgentByAreaCode(areaCode, proxyInfo);
+  let proxyAgent = getProxyAgentByAreaCode( proxyInfo);
   let { proxyIp, location } = await getAgentPublicIp(proxyAgent);
   try {
     var nextUrl = shortUrl;
