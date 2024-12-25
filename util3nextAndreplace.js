@@ -205,7 +205,7 @@ async function getNextLocation (url, proxyAgent) {
   }
   // 没找到302 检查如果是200中带JS
 
-  return nextUrl;
+  return nextUrl.replace(/\\\//g, '/');
 
 }
 
