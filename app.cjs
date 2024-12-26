@@ -20,10 +20,10 @@ app.get('/api/data', (req, res) => {
 
 app.post('/api/getTargetUrl', async (req, res) => {
   // 从请求体中获取url和cityCode参数
-  const { url, areaCode, proxyInfo ,funType} = req.body;
+  const { url, proxyInfo ,funType,refererUrl} = req.body;
   try {
-    const { targetUrl, history, proxyIp, location } = await getBonusArriveRedirectUrl(url, proxyInfo,funType);
-    const result = buildResult(url, targetUrl, history, proxyIp, location, areaCode);
+    const { targetUrl, history, proxyIp, location } = await getBonusArriveRedirectUrl(url, proxyInfo,funType,refererUrl);
+    const result = buildResult(url, targetUrl, history, proxyIp, location);
     res.json(result);
   } catch (error) {
     // 错误处理
@@ -36,14 +36,13 @@ app.post('/api/getTargetUrl', async (req, res) => {
   }
 });
 
-function buildResult (url, targetUrl, history, proxyIp, location, areaCode) {
+function buildResult (url, targetUrl, history, proxyIp, location) {
   if (targetUrl != null && targetUrl.length > 0) {
     return {
       status: 'success',
       message: '请求处理成功',
       data: {
         url,
-        areaCode,
         targetUrl,
         history,
         proxyIp,
@@ -56,7 +55,6 @@ function buildResult (url, targetUrl, history, proxyIp, location, areaCode) {
     message: '请求处理失败',
     data: {
       url,
-      areaCode: areaCode,
       targetUrl,
       history,
       proxyIp,
