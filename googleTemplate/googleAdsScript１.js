@@ -1,21 +1,23 @@
 var failCount = 0;  // 记录连续失败次数
 
-function getUrlFromApi(url, proxyInfo,funType) {
-  var apiUrl = "http://198.11.177.211:3000/api/getTargetUrl"; // API接口地址
+function getUrlFromApi(url, proxyInfo,funType,refererUrl) {
+  var apiUrl = "http://198.11.177.211:3000/api/getTargetUrl";
 
   // 构造请求体
   var payload = {
     "url": url,
     "proxyInfo": proxyInfo,
-    "funType":funType
+    "funType":funType,
+    "refererUrl":refererUrl
+
   };
 
   // 配置请求头和请求体
   var options = {
-    'method': 'post', // 使用 POST 请求
-    'contentType': 'application/json', // 设置请求类型
-    'payload': JSON.stringify(payload), // 请求体
-    'muteHttpExceptions': true, // 忽略HTTP错误，方便调试
+    'method': 'post', //
+    'contentType': 'application/json', //
+    'payload': JSON.stringify(payload), //
+    'muteHttpExceptions': true, //
   };
 
   try {
@@ -26,12 +28,12 @@ function getUrlFromApi(url, proxyInfo,funType) {
     // 获取接口返回的 URL 和 history 列表
     if (responseJson.status !== 'success') {
       Logger.log('API response error: ' + responseJson.message);
-      return null; // 如果接口返回失败状态，直接返回 null
+      return null; //
     }
 
-    var targetUrl = responseJson.data.targetUrl; // 获取 targetUrl 字段
-    var history = responseJson.data.history; // 获取 history 列表
-    var url = responseJson.data.url; // 获取原始 URL
+    var targetUrl = responseJson.data.targetUrl; //
+    var history = responseJson.data.history; //
+    var url = responseJson.data.url; //
     return { targetUrl: targetUrl, history: history, url: url };
   } catch (e) {
     Logger.log('Error fetching URL from API: ' + e.toString());
@@ -42,16 +44,16 @@ function getUrlFromApi(url, proxyInfo,funType) {
 function main() {
   // 配置您的代理信息
   var proxyInfo = {
-    "username": "uPc6yO0KYBKFK7Ba",
-    "password": "K2EMHhDpaaFVryse_country-us",
-    "host": "geo.iproyal.com",
-    "port": "12321"
+    "username": "huashao988-zone-custom-region-us",             //填写代理信息===============
+    "password": "huashao988",
+    "host": "91b6c411c42db002.arq.na.ipidea.online",
+    "port": "2333"
   };
-  var funType = "fun1";
+  var funType = "fun2";
   // 配置您的 URL，可以通过 history 列表选择或使用 url 或 targetUrl 字段
-  var defaultUrl = "https://www.bonusarrive.com/link?ad=138681&c=1346&f=0"; // 默认URL
-  var useHistory = false;  // 设置为 true 使用 history 列表，false 使用 targetUrl 或 url
-
+  var defaultUrl = "https://www.bonusarrive.com/link?ad=22983&c=1346&subid=&sub2id=&url=http%3A%2F%2Fwww.stepone.life&from=3"; // 短链接=======================
+  var useHistory = false;  // 高阶用法 设置为 true 使用 history 列表，false 使用 targetUrl 或 url
+  var refererUrl = null;    //高阶用法 增加溯源默认为null
   // 设置要使用的 history 索引（如果 useHistory 为 true）
   var historyIndex = 0;  // 默认使用 history 列表中的第一个 URL
 
@@ -60,7 +62,7 @@ function main() {
     Logger.log("Script execution started at: " + new Date());
 
     // 从接口获取目标 URL 和 history 列表
-    var apiResponse = getUrlFromApi(defaultUrl, proxyInfo,funType);
+    var apiResponse = getUrlFromApi(defaultUrl, proxyInfo,funType,refererUrl);
 
     if (apiResponse) {
       var targetUrl = apiResponse.targetUrl;  // 获取 targetUrl
@@ -78,7 +80,7 @@ function main() {
       Logger.log("Selected URL for processing: " + selectedUrl);
 
       // 获取广告系列
-      const campaignName = "FL LSKD";  // 广告系列名称
+      const campaignName = "FL　Step One AU";  // 广告系列名称==========================
       const campaignIterator = AdsApp.campaigns()
           .withCondition(`campaign.name = "${campaignName}"`)
           .get();
