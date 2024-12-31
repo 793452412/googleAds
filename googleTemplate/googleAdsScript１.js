@@ -44,14 +44,14 @@ function getUrlFromApi(url, proxyInfo,funType,refererUrl) {
 function main() {
   // 配置您的代理信息
   var proxyInfo = {
-    "username": "huashao988-zone-custom-region-us",             //填写代理信息===============
-    "password": "huashao988",
-    "host": "91b6c411c42db002.arq.na.ipidea.online",
-    "port": "2333"
+    "username": "geo.iproyal.com",             //填写代理信息===============
+    "password": "32325",
+    "host": "zTC7oHIMUpu9kxtk",
+    "port": "pqikxocHpF43TApU¡country-us"
   };
-  var funType = "fun2";
+  var funType = "fun2"; // 多麦 LKB PB fun1    BA：fun2   部分链接fun1不行的时候就用Fun2如果都不行则发聩
   // 配置您的 URL，可以通过 history 列表选择或使用 url 或 targetUrl 字段
-  var defaultUrl = "https://www.bonusarrive.com/link?ad=22983&c=1346&subid=&sub2id=&url=http%3A%2F%2Fwww.stepone.life&from=3"; // 短链接=======================
+  var defaultUrl = "https://www.bonusarrive.com/link?ad=235927&c=1346&subid=&sub2id=&url="; // 短链接=======================
   var useHistory = false;  // 高阶用法 设置为 true 使用 history 列表，false 使用 targetUrl 或 url
   var refererUrl = null;    //高阶用法 增加溯源默认为null
   // 设置要使用的 history 索引（如果 useHistory 为 true）
@@ -72,15 +72,15 @@ function main() {
       // 根据 useHistory 常量选择 URL
       var selectedUrl;
       if (useHistory && history && history.length > 0) {
-        selectedUrl = history[historyIndex];  // 使用 history 列表中的 URL
+        selectedUrl = history[historyIndex];
       } else {
-        selectedUrl = targetUrl || url || defaultUrl;  // 使用 targetUrl 或 url，若无则使用默认 URL
+        selectedUrl = targetUrl || url || defaultUrl;
       }
 
       Logger.log("Selected URL for processing: " + selectedUrl);
 
       // 获取广告系列
-      const campaignName = "FL　Step One AU";  // 广告系列名称==========================
+      const campaignName = "FL  Sittercity";  // 广告系列名称==========================
       const campaignIterator = AdsApp.campaigns()
           .withCondition(`campaign.name = "${campaignName}"`)
           .get();
@@ -103,9 +103,9 @@ function main() {
         // 检查是否跟踪模板需要更新
         if (cd_url !== currentTrackingTemplate) {
           Logger.log("Constructed new tracking template: " + cd_url);
-          urls.setTrackingTemplate(cd_url); // 更新跟踪模板
+          urls.setTrackingTemplate(cd_url);
           Logger.log("Updated tracking template for campaign: " + campaign.getName());
-          failCount = 0;  // 成功更新，重置失败计数
+          failCount = 0;
         } else {
           Logger.log("No change in tracking template, skipping update.");
         }
@@ -114,13 +114,13 @@ function main() {
       }
     } else {
       Logger.log("Failed to get the final URL from API.");
-      failCount++;  // 增加失败计数
+      failCount++;
     }
 
     // 检查是否已经连续失败 3 次
     if (failCount >= 3) {
       Logger.log("Script has failed 3 times consecutively. Stopping the script.");
-      break;  // 停止脚本
+      break;
     }
 
     // 每次循环后等待 1 分钟
