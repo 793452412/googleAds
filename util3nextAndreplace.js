@@ -1,4 +1,5 @@
 import { HttpsProxyAgent  } from 'https-proxy-agent'
+import fetch from 'node-fetch'
 import { HttpProxyAgent  } from 'http-proxy-agent'
 import axios from 'axios'
 import * as cheerio from 'cheerio';
@@ -100,14 +101,14 @@ export  function getProxyAgentByAreaCode( proxyInfo) {
     // password: 'chuyi1122',
     // host: 'proxy.smartproxycn.com',
     // port: '1000',
-    username: 'uPc6yO0KYBKFK7Ba',
-    password: 'K2EMHhDpaaFVryse_country-us',
-    host: 'geo.iproyal.com',
-    port: '12321',
-    // username: 'coment73028-res-ROW',
-    // password: 'Bok0ObLI0889m6pTT7X9',
-    // host: 'proxy.iprocket.io',
-    // port: '5959'
+    // username: 'uPc6yO0KYBKFK7Ba',
+    // password: 'K2EMHhDpaaFVryse_country-us',
+    // host: 'geo.iproyal.com',
+    // port: '12321',
+    username: 'coment73028-res-ROW',
+    password: 'Bok0ObLI0889m6pTT7X9',
+    host: 'proxy.iprocket.io',
+    port: '5959'
   };
   const selectedProxy = proxyInfo || defaultProxy;
   console.log("selectedProxy  : " + JSON.stringify(selectedProxy));
