@@ -15,7 +15,7 @@ export async function  getRedirectHeaders(url,agent,heard) {
     httpsAgent: agent,
     httpAgent: agent,
     headers: heard,
-    timeout:5000
+    // timeout:5000
   });
   const reHeard = response.headers;
   const redict = {};
@@ -107,9 +107,9 @@ export  function getProxyAgentByAreaCode( proxyInfo) {
     port: '5959'
   };
   const selectedProxy = proxyInfo || defaultProxy;
-  console.log("selectedProxy  : " + JSON.stringify(selectedProxy));
+  // console.log("selectedProxy  : " + JSON.stringify(selectedProxy));
   const { username, password, host, port } = selectedProxy;
-  console.log(`当前IP ：http://${username}:${password}@${host}:${port}`)
+  // console.log(`当前IP ：http://${username}:${password}@${host}:${port}`)
   const proxyUrl = `http://${username}:${password}@${host}:${port}`;
   return new HttpsProxyAgent(proxyUrl)
 }
@@ -125,11 +125,12 @@ export async function getAgentPublicIp (agent,headers) {
     });
     // console.log(response?.data);
     proxyIp = response?.data?.origin;
+    console.log("proxyIp : " ,proxyIp);
     if (proxyIp != undefined) {
       // 获取代理服务器IP的归属地信息
       const url = `http://opendata.baidu.com/api.php?query=${proxyIp}&resource_id=6006&oe=utf8`;
       const locationInfo = await axios.get(url, { timeout: 3000 });
-      console.log(locationInfo?.data?.data[0]?.location);
+      // console.log(locationInfo?.data?.data[0]?.location);
       location = locationInfo?.data?.data[0]?.location;
     }
   } catch (error) {
@@ -185,7 +186,7 @@ export async function bulidHeards(refererUrl=undefined) {
 
 
 //fun1
-export async function   getDuomaiTargetUrl (shortUrl,proxyInfo,refererUrl) {
+export async function   getDuomaiTargetUrl (shortUrl,proxyAgent,refererUrl) {
   // 解析URLhttps://app.partnermatic.com/track/b7f6y1oJTi8biVngnexde8_arqC2wSYJx3zmZ_b38_aUKool_bsD8ONK3ZSJ5LoswUp5bmNBQgkvgHu3?url=https%3A%2F%2Fwearnumi.com&uid=1221
 
   console.log('run DuomaiTargetUrl =================================================================================');
@@ -200,7 +201,7 @@ export async function   getDuomaiTargetUrl (shortUrl,proxyInfo,refererUrl) {
     return;
   }
 
-  let proxyAgent = getProxyAgentByAreaCode( proxyInfo);  //获取代理商转发地址
+  // let proxyAgent = getProxyAgentByAreaCode( proxyInfo);  //获取代理商转发地址
   let { proxyIp, location } = await getAgentPublicIp(proxyAgent,heard);   // 获取代理地址相关信息 IP  所属地区
 
   console.log("获取代理地址成功");
@@ -214,7 +215,7 @@ export async function   getDuomaiTargetUrl (shortUrl,proxyInfo,refererUrl) {
   const scriptContent = $('script').text();
   // console.log('getDuomaiTargetUrl　scriptContent  :' +scriptContent);
 
-  // const regex = /var u=(['"](.+?)['"])/;  //学安 旧
+  // const regex = /var u=(['"](.+?)['"])/;
   const regex = /var\s+u\s*=\s*(['"])(https?.+?)\1/;
   const match = scriptContent.match(regex);
   // console.log('getDuomaiTargetUrl match :' +match);
@@ -267,21 +268,22 @@ export async function   getDuomaiTargetUrl (shortUrl,proxyInfo,refererUrl) {
 export async function getBonusArriveRedirectUrl (shortUrl, proxyInfo,funType,refererUrl) {
   // 解析URL
   const parsedUrl = new URL(shortUrl);
+  let proxyAgent = getProxyAgentByAreaCode( proxyInfo);
+
 
   if (funType =='fun1'){
-      return await getDuomaiTargetUrl(shortUrl,  proxyInfo,refererUrl);
+      return await getDuomaiTargetUrl(shortUrl,  proxyAgent,refererUrl);
   }
 
   if(funType ==='fun3'){
     console.log("运行 getYeahPromosTargetUrl");
-    return await getYeahPromosTargetUrl(shortUrl, proxyInfo,refererUrl);
+    return await getYeahPromosTargetUrl(shortUrl, proxyAgent,refererUrl);
   }
 
   console.log('run BonusArriveRedirectUrl =================================================================================');
 
   let heard = await bulidHeards(refererUrl);
   var history = [shortUrl];
-  let proxyAgent = getProxyAgentByAreaCode( proxyInfo);
   let { proxyIp, location } = await getAgentPublicIp(proxyAgent,heard);
   try {
     var nextUrl = shortUrl;
@@ -295,7 +297,7 @@ export async function getBonusArriveRedirectUrl (shortUrl, proxyInfo,funType,ref
         tempUrl = await getNextLocation(nextUrl, proxyAgent,heard);
         lastParseUrl = nextUrl;
       } catch (error) {
-        console.log('find 3xx redirects exception')
+        console.log('getNextLocation 报错 :',error)
       }
       // 找不到下一个重定向头部地址，终端
       if (tempUrl != null && tempUrl.length > 0) {
@@ -341,7 +343,7 @@ export async function getBonusArriveRedirectUrl (shortUrl, proxyInfo,funType,ref
 }
 
 //fun3
-export async function getYeahPromosTargetUrl (shortUrl,agent,refererUrl) {
+export async function getYeahPromosTargetUrl (shortUrl,proxyAgent,refererUrl) {
   console.log("getYeahPromosTargetUrl :  运行了")
   const heard = await bulidHeards(refererUrl);
   console.log("heard : ",heard)
@@ -349,12 +351,10 @@ export async function getYeahPromosTargetUrl (shortUrl,agent,refererUrl) {
     console.error('Received invalid headers:', heard);
     return;
   }
-  console.log(`shortUrl: ${refererUrl}`);
-  console.log(`agent: ${agent}`);
-  console.log(`refererUrl: ${refererUrl}`);
-  console.log(`+++++++++++++++++++++++++++++++++++++++++++++++++++++++++`);
-
-  let proxyAgent = getProxyAgentByAreaCode( agent);  //获取代理商转发地址
+  // console.log(`shortUrl: ${refererUrl}`);
+  // console.log(`agent: ${proxyAgent}`);
+  // console.log(`refererUrl: ${refererUrl}`);
+  // console.log(`+++++++++++++++++++++++++++++++++++++++++++++++++++++++++`);
   let { proxyIp, location } = await getAgentPublicIp(proxyAgent,heard);   // 获取代理地址相关信息 IP  所属地区
   //从请求头获取重定向链接
   const direct = await checkYeahHeardLoca(shortUrl,proxyAgent,heard)
@@ -375,9 +375,12 @@ export async function getYeahPromosTargetUrl (shortUrl,agent,refererUrl) {
     console.log(`history[-1] : ${nextURL}`);
 
     try{
-      getnextUrl = await getNextLocation(nextURL, agent,heard);
+
+      console.log(" getnextUrl : ========" ,i)
+      getnextUrl = await getNextLocation(nextURL, proxyAgent,heard);
 
       if (getnextUrl !== null && getnextUrl !== undefined && getnextUrl !== history[history.length - 1]) {
+
 
         history.push(getnextUrl);
         continue
@@ -390,16 +393,17 @@ export async function getYeahPromosTargetUrl (shortUrl,agent,refererUrl) {
     console.log(`使用getNextLocationgetNextLocationgetNextLocationgetNextLocationgetNextLocationgetNextLocation`);
 
     try{
-      while (attempts < maxRetries) {   //页面寻找 对应重定向URL 可能会有代理网络延迟的情况，循环三次，找到就打断
+      // while (attempts < maxRetries) {   //页面寻找 对应重定向URL 可能会有代理网络延迟的情况，循环三次，找到就打断
         console.log(`使用getReplaceUrlgetReplaceUrlgetReplaceUrlgetReplaceUrlgetReplaceUrlgetReplaceUrlgetReplaceUrlgetReplaceUrlgetReplaceUrl`);
+        console.log(" getReplaceUrl : ========" ,i)
 
-        const  getUrl = await getReplaceUrl(nextURL,proxyAgent,heard);
+      const  getUrl = await getReplaceUrl(nextURL,proxyAgent,heard);
         if (getUrl !== null && getUrl !== undefined) {
           history.push(getUrl);
-          break;
+          // break;
         }
         attempts++;
-      }
+      // }
     }catch(err){
       history.push(nextURL);
       // histroyUrlList.push(nextURL);
@@ -423,37 +427,35 @@ export async function getYeahPromosTargetUrl (shortUrl,agent,refererUrl) {
 async function getNextLocation (url, proxyAgent,heard) {
 
   console.log('url : ' + url);
-  console.log('proxyAgent : ' + proxyAgent);
-  console.log('proxyAgent : ' + heard);
+  // console.log('proxyAgent : ' + proxyAgent);
+  // console.log('proxyAgent : ' + heard);
+  var nextUrl =url
+  try{
+      const response = await axios.get(url, {
+      httpsAgent: proxyAgent,
+      httpAgent: proxyAgent,
+      headers: heard,
+      maxRedirects  : 0
+    })
+    // console.log("999999999999999999999999999999999999999999");
+    // console.log(response);
+    // console.log("999999999999999999999999999999999999999999");
+  }catch (error) {
+    if (error.response && error.response.status >= 300 && error.response.status < 400) {
+      // 获取重定向的目标 URL
+      // console.log("999999999999999999999999999999999999999999");
+      // console.log(error.response);
+      // console.log("999999999999999999999999999999999999999999");
+      nextUrl = error.response.headers['location'];
+      console.log('getNextLocation Redirect URL:', nextUrl);
 
-  const response = await fetch(url, {
-    method: 'GET',
-    redirect: 'manual', // 禁止自动重定向
-    agent: proxyAgent,
-    headers: heard
-  });
-
-  // console.log("999999999999999999999999999999999999999999");
-  // console.log(response);
-  // console.log("999999999999999999999999999999999999999999");
+    } else {
+      nextUrl = url
+      console.error('getNextLocation Request failed:', error.message);
+    }
 
 
-  console.log('getNextLocation response.status: '+response.status + url)
-  let nextUrl = url  //原为空
-  // let nextUrl = ''  //原为空
-  if (response.status >= 300 && response.status < 400) {
-    // bonus自定义转跳
-    nextUrl = response.headers.get('Location');
-    console.log('response.status >= 300  : ' + nextUrl);
-  }
-  if (response.redirect) {
-    // 重定向
-    nextUrl = response.url;
-    console.log('response.redirect  : ' + nextUrl);
-
-  }
-  // 没找到302 检查如果是200中带JS
-
+}
   return nextUrl.replace(/\\\//g, '/');
 
 }
@@ -463,12 +465,16 @@ const list_regex =
   /var\s+u\s*=\s*(['"])(https?.+?)\1/,
   /location\.replace\('([^']+)'\)/,
   /var\s+u\s*=\s*['"]([^'"]+)['"]/,
-  /var link = "(.*?)";/];
+  /var link = "(.*?)";/,
+      /window\.location\.assign\s*\(\s*['"]([^'"]+)['"]\s*\)/,
+      /window\.location\.replace\(["']([^"']+)["']\)/
+    ];
 export async function getReplaceUrl (url, proxyAgent,heard) {
   const response = await axios.get(url, {
     'httpAgent': proxyAgent,
+    'httpsAgent': proxyAgent,
     headers: heard,
-    timeout: 5000 });
+     });
   // 使用cheerio来解析HTML
   const $ = cheerio.load(response.data);
   const parsedUrl = new URL(url);

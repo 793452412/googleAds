@@ -1,5 +1,5 @@
-import {bulidHeards,getAgentPublicIp} from "../util3nextAndreplace.js";
-import { getProxyAgentByAreaCode,getByAxions} from "../util3nextAndreplace.js";
+import {bulidHeards,getAgentPublicIp} from "../util3nextAndreplace_OLD.js";
+import { getProxyAgentByAreaCode} from "../util3nextAndreplace_OLD.js";
 import axios from 'axios'
 
 import fetch from "node-fetch";
@@ -34,10 +34,10 @@ console.log(heard);
 console.log("heard===", heard);
 
 const proxyInfo = {
-    "username": "huashao988-zone-custom-region-us",
-    "password": "huashao988",
-    "host": "91b6c411c42db002.arq.na.ipidea.online",
-    "port": "2333"
+    "username": "uPc6yO0KYBKFK7Ba",
+    "password": "K2EMHhDpaaFVryse_country-us",
+    "host": "geo.iproyal.com",
+    "port": "12321"
 }
 console.log("=================================================================================================");
 

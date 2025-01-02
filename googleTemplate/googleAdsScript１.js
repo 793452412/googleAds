@@ -98,7 +98,9 @@ function main() {
         const queryParams = urlParts.length > 1 ? '?' + urlParts[1] : '';
 
         // 构建新的跟踪模板
-        const cd_url = `{lpurl}${queryParams}`;
+        // const cd_url = `{lpurl}${queryParams}`;
+        const match  = url.match(/\?[^?]*awc=[^&]*/); //awin
+        const cd_url = match[0]; //awin
 
         // 检查是否跟踪模板需要更新
         if (cd_url !== currentTrackingTemplate) {

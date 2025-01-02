@@ -123,11 +123,11 @@ export async function  getAgentPublicIp (agent,headers) {
   let proxyIp = '';
   let location = '';
   try {
-    // const response = await axios.get('https://httpbin.org/ip', {
-    //   httpsAgent: agent,
-    //   httpAgent: agent,
-    //   headers: headers
-    // });
+    const response = await axios.get('https://httpbin.org/ip', {
+      httpsAgent: agent,
+      httpAgent: agent,
+      headers: headers
+    });
     // const response = await fetch('https://httpbin.org/ip', {
     //   method: 'GET',
     //   redirect: 'manual', // 禁止自动重定向
@@ -135,7 +135,6 @@ export async function  getAgentPublicIp (agent,headers) {
     //   headers: headers
     // });
     // console.log(response?.data);
-    const response =await getByAxions('https://httpbin.org/ip',agent,headers)
 
     proxyIp = response?.data?.origin;
     if (proxyIp != undefined) {

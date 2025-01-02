@@ -1,4 +1,4 @@
-import { getBonusArriveRedirectUrl, getDuomaiTargetUrl } from './util3nextAndreplace.js'
+import { getBonusArriveRedirectUrl, getDuomaiTargetUrl } from './util3nextAndreplace_OLD.js'
 
 
 // var lastUrl2 = await getBonusArriveRedirectUrl('https://lb.b9t.cc/1I1S',);
@@ -21,7 +21,10 @@ const proxyInfo = {
 // var lastUrl2 = await getDuomaiTargetUrl('https://app.partnermatic.com/track/3290GsBng0Lgtxi0VlR9IT3c8GWJg8I2KVRutlKkZvCKNCBX5e4p8aLRMdDMdgsYlXgHFp1ziJTd0xAnVFbDh_aY_c',proxyInfo)
 // var lastUrl2 = await getDuomaiTargetUrl("https://www.bonusarrive.com/link?ad=235927&c=1346&subid=&sub2id=&url=",proxyInfo,'www.baidu.com' )
 // var lastUrl2 = await getBonusArriveRedirectUrl("https://yeahpromos.com/index/index/openurl?track=45d78ca07bf16e43&url=",proxyInfo,'fun3' ,'www.baidu.com')
-var lastUrl2 = await getBonusArriveRedirectUrl("https://trac.fanstoshop.com/track.php?ref=1065288&aid=35594&euid=%7B%7BDATETIME%7D%7D&t=https%3A%2F%2Fwww.anntaylor.com",proxyInfo,'fun2' ,'www.baidu.com')
+// var lastUrl2 = await getBonusArriveRedirectUrl("https://trac.fanstoshop.com/track.php?ref=1065288&aid=35594&euid=%7B%7BDATETIME%7D%7D&t=https%3A%2F%2Fwww.anntaylor.com",proxyInfo,'fun2' ,'www.baidu.com')
+
+let url2 = "https://yeahpromos.com/index/index/openurl?track=a446667434935dd6&url="
+var lastUrl2 = await getBonusArriveRedirectUrl(url2,proxyInfo,'fun3' ,'www.baidu.com')
 // var lastUrl2 = await getDuomaiTargetUrl('https://yeahpromos.com/index/index/openurl?track=8545d380cc57fa27&url=')
 
 
