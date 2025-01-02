@@ -4,7 +4,8 @@ const bodyParser = require('body-parser');
 const { URL } = require('url');
 const app = express();
 const port = 3001;
-const { getBonusArriveRedirectUrl } = require('./util3nextAndreplace.js')
+// const { getBonusArriveRedirectUrl } = require('./util3nextAndreplace.js')
+const { getBonusArriveRedirectUrl } = require('./util3nextAndreplace_OLD.js')
 
 
 // 使用body-parser中间件解析JSON请求体
