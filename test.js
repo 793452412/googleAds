@@ -23,7 +23,7 @@ const proxyInfo = {
 // var lastUrl2 = await getBonusArriveRedirectUrl("https://yeahpromos.com/index/index/openurl?track=45d78ca07bf16e43&url=",proxyInfo,'fun3' ,'www.baidu.com')
 // var lastUrl2 = await getBonusArriveRedirectUrl("https://trac.fanstoshop.com/track.php?ref=1065288&aid=35594&euid=%7B%7BDATETIME%7D%7D&t=https%3A%2F%2Fwww.anntaylor.com",proxyInfo,'fun2' ,'www.baidu.com')
 
-let url2 = "https://yeahpromos.com/index/index/openurl?track=a446667434935dd6&url="
+let url2 = " https://yeahpromos.com/index/index/openurl?track=45d78ca07bf16e43&url="
 var lastUrl2 = await getBonusArriveRedirectUrl(url2,proxyInfo,'fun3' ,'www.baidu.com')
 // var lastUrl2 = await getDuomaiTargetUrl('https://yeahpromos.com/index/index/openurl?track=8545d380cc57fa27&url=')
 

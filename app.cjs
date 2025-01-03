@@ -6,6 +6,7 @@ const app = express();
 const port = 3001;
 // const { getBonusArriveRedirectUrl } = require('./util3nextAndreplace.js')
 const { getBonusArriveRedirectUrl } = require('./util3nextAndreplace_OLD.js')
+const axios = require('axios'); // 引入axios用于发送HTTP请求
 
 
 // 使用body-parser中间件解析JSON请求体
@@ -23,6 +24,21 @@ app.get('/api/data', (req, res) => {
 app.post('/api/getTargetUrl', async (req, res) => {
   // 从请求体中获取url和cityCode参数
   const { url, proxyInfo ,funType,refererUrl} = req.body;
+
+  const flaskData = {
+    url,
+    proxyInfo,
+    funType,
+    refererUrl
+  };
+
+  try {
+    await axios.post('http://127.0.0.1:5000/insert_or_update_data', flaskData);
+    console.log('Data successfully sent to Flask API');
+  } catch (flaskError) {
+    console.error('Error calling Flask API:', flaskError.message);
+  }
+
 
   try {
 
