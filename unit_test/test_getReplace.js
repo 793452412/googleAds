@@ -10,7 +10,7 @@ const proxyInfo = {
 const heard = await bulidHeards("www.baidu.com") //不设置则为空
 // const heard = await bulidHeards() //不设置则为空
 
-const nextUrl ='https://www.kfzteile24.de/index.cgi?utm_medium=aff&utm_source=awin&utm_campaign=1363573&utm_content=1363573-7458061679_a~5tofcf6j3fjoafeoxx20241230;k~kfzteile24&icid=10-002&sv1=affiliate&sv_campaign_id=1363573&awc=13928_1735551118_b656821e114ea9230a0950f853534c86'
+const nextUrl =' https://api.yadore.com/v2/d?market=us&placementId=YEAHe95d9488ad51e8f0&projectId=BvUlvaD9lar7&isCouponing=true&url=https://stockx.com'
 const proxy = await getProxyAgentByAreaCode(proxyInfo);
 
 

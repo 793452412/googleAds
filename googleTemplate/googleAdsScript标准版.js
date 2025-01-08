@@ -1,7 +1,7 @@
 var failCount = 0;  // 记录连续失败次数
 
 function getUrlFromApi(url, proxyInfo,funType,refererUrl) {
-  var apiUrl = "http://198.11.177.211:3000/api/getTargetUrl";
+  var apiUrl = "http://198.11.177.211:3001/api/getTargetUrl";
 
   // 构造请求体
   var payload = {
@@ -44,14 +44,14 @@ function getUrlFromApi(url, proxyInfo,funType,refererUrl) {
 function main() {
   // 配置您的代理信息
   var proxyInfo = {
-    "username": "geo.iproyal.com",             //填写代理信息===============
-    "password": "32325",
-    "host": "zTC7oHIMUpu9kxtk",
-    "port": "pqikxocHpF43TApU¡country-us"
+    "username": "coment73028-res-ROW",             //填写代理信息===============
+    "password": "Bok0ObLI0889m6pTT7X9",
+    "host": "proxy.iprocket.io",
+    "port": "5959"
   };
   var funType = "fun2"; // 多麦 LKB PB fun1    BA：fun2   部分链接fun1不行的时候就用Fun2如果都不行则发聩
   // 配置您的 URL，可以通过 history 列表选择或使用 url 或 targetUrl 字段
-  var defaultUrl = "https://www.bonusarrive.com/link?ad=235927&c=1346&subid=&sub2id=&url="; // 短链接=======================
+  var defaultUrl = "https://www.bonusarrive.com/link?ad=139092&c=1447&subid=&sub2id=&url="; // 短链接=======================
   var useHistory = false;  // 高阶用法 设置为 true 使用 history 列表，false 使用 targetUrl 或 url
   var refererUrl = null;    //高阶用法 增加溯源默认为null
   // 设置要使用的 history 索引（如果 useHistory 为 true）
@@ -80,7 +80,7 @@ function main() {
       Logger.log("Selected URL for processing: " + selectedUrl);
 
       // 获取广告系列
-      const campaignName = "FL  Sittercity";  // 广告系列名称==========================
+      const campaignName = "Website traffic-Search-whatnot";  // 广告系列名称==========================
       const campaignIterator = AdsApp.campaigns()
           .withCondition(`campaign.name = "${campaignName}"`)
           .get();
@@ -98,9 +98,9 @@ function main() {
         const queryParams = urlParts.length > 1 ? '?' + urlParts[1] : '';
 
         // 构建新的跟踪模板
-        // const cd_url = `{lpurl}${queryParams}`;
-        const match  = url.match(/\?[^?]*awc=[^&]*/); //awin
-        const cd_url = match[0]; //awin
+        const cd_url = `{lpurl}${queryParams}`;
+        // const match  = url.match(/\?[^?]*awc=[^&]*/); //awin
+        // const cd_url = match[0]; //awin
 
         // 检查是否跟踪模板需要更新
         if (cd_url !== currentTrackingTemplate) {
